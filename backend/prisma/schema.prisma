@@ -1,0 +1,59 @@
+// Prisma Schema - Insurtech Quote & Bind Platform
+// LibelulaSoft Technical Evaluation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  policies  Policy[]
+
+  @@map("users")
+}
+
+model Quote {
+  id               String      @id @default(uuid())
+  status           QuoteStatus @default(QUOTED)
+  insuranceType    String
+  coverage         String
+  age              Int
+  location         String
+  estimatedPremium Float
+  breakdown        Json
+  createdAt        DateTime    @default(now())
+  policy           Policy?
+
+  @@map("quotes")
+}
+
+model Policy {
+  id       String       @id @default(uuid())
+  quoteId  String       @unique // Unique constraint to prevent double emission per quote
+  quote    Quote        @relation(fields: [quoteId], references: [id])
+  userId   String
+  user     User         @relation(fields: [userId], references: [id])
+  status   PolicyStatus @default(ACTIVE)
+  issuedAt DateTime     @default(now())
+
+  @@map("policies")
+}
+
+enum QuoteStatus {
+  QUOTED
+  BOUND
+}
+
+enum PolicyStatus {
+  ACTIVE
+  CANCELLED
+}
