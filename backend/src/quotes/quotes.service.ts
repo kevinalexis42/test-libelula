@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 
-interface BreakdownItem {
+export interface BreakdownItem {
   concept: string;
   amount: number;
 }
@@ -117,7 +117,7 @@ export class QuotesService {
       throw new NotFoundException(`Cotización con id '${id}' no encontrada`);
     }
 
-    return this.formatQuote(quote, quote.breakdown as BreakdownItem[]);
+    return this.formatQuote(quote, (quote.breakdown as unknown) as BreakdownItem[]);
   }
 
   private calculatePremium(

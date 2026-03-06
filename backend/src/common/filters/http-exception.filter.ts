@@ -58,8 +58,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status,
       detail,
       instance: request.url,
-      ...(errors && { errors }),
     };
+    if (errors) {
+      problemDetails.errors = errors;
+    }
 
     response.status(status).json(problemDetails);
   }

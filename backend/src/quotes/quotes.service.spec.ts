@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QuotesService } from './quotes.service';
 import { CatalogsService } from '../catalogs/catalogs.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { InsuranceType, CoverageType } from './dto/create-quote.dto';
 
 // Mock PrismaService
 const mockPrisma = {
@@ -15,6 +16,14 @@ describe('QuotesService', () => {
   let quotesService: QuotesService;
   let catalogsService: CatalogsService;
 
+  // validDto disponible en todos los describe anidados
+  const validDto = {
+    insuranceType: InsuranceType.AUTO,
+    coverage: CoverageType.PREMIUM,
+    age: 35,
+    location: 'EC-AZUAY',
+  };
+
   beforeEach(() => {
     catalogsService = new CatalogsService();
     quotesService = new QuotesService(mockPrisma as any, catalogsService);
@@ -22,13 +31,6 @@ describe('QuotesService', () => {
   });
 
   describe('createQuote', () => {
-    const validDto = {
-      insuranceType: 'AUTO' as const,
-      coverage: 'PREMIUM' as const,
-      age: 35,
-      location: 'EC-AZUAY',
-    };
-
     it('should create a quote with correct premium calculation', async () => {
       const mockQuote = {
         id: 'test-uuid',
@@ -59,7 +61,6 @@ describe('QuotesService', () => {
     });
 
     it('should calculate AGE_FACTOR correctly for different age ranges', async () => {
-      // Age < 25 -> factor 50
       const youngDto = { ...validDto, age: 22 };
       mockPrisma.quote.create.mockResolvedValue({
         id: 'uuid',
@@ -88,10 +89,7 @@ describe('QuotesService', () => {
       await expect(quotesService.createQuote(invalidDto)).rejects.toThrow(BadRequestException);
     });
 
-    it('should throw BadRequestException for invalid coverage+insuranceType combo', async () => {
-      // This would fail since coverage must exist for the insurance type
-      // (all coverage types exist for all insurance types in this implementation)
-      // Testing with an actually invalid value
+    it('should throw BadRequestException for invalid coverage', async () => {
       const invalidDto = { ...validDto, coverage: 'FULL' as any };
       await expect(quotesService.createQuote(invalidDto)).rejects.toThrow(BadRequestException);
     });
@@ -131,7 +129,7 @@ describe('QuotesService', () => {
 
   describe('Premium calculation logic', () => {
     it('should calculate SALUD BASE as 150', async () => {
-      const saludDto = { ...validDto, insuranceType: 'SALUD' as const, coverage: 'BASICA' as const };
+      const saludDto = { ...validDto, insuranceType: InsuranceType.SALUD, coverage: CoverageType.BASICA };
       mockPrisma.quote.create.mockResolvedValue({
         id: 'uuid',
         status: 'QUOTED',
@@ -148,7 +146,7 @@ describe('QuotesService', () => {
     });
 
     it('should calculate HOGAR BASE as 100', async () => {
-      const hogarDto = { ...validDto, insuranceType: 'HOGAR' as const };
+      const hogarDto = { ...validDto, insuranceType: InsuranceType.HOGAR };
       mockPrisma.quote.create.mockResolvedValue({
         id: 'uuid',
         status: 'QUOTED',

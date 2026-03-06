@@ -7,7 +7,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: Error, user: unknown) {
+  handleRequest<TUser = any>(err: Error, user: TUser): TUser {
     if (err || !user) {
       throw new UnauthorizedException(
         'Acceso no autorizado. Proporcione un token JWT válido en el header Authorization: Bearer <token>',

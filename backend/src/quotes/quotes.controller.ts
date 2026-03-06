@@ -3,6 +3,15 @@ import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBody } from '@nestjs/s
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 
+type QuoteResponse = Promise<{
+  id: string;
+  status: string;
+  inputs: { insuranceType: string; coverage: string; age: number; location: string };
+  estimatedPremium: number;
+  breakdown: { concept: string; amount: number }[];
+  createdAt: Date;
+}>;
+
 @ApiTags('Quotes')
 @Controller('quotes')
 export class QuotesController {
@@ -44,7 +53,7 @@ export class QuotesController {
     status: 400,
     description: 'Datos inválidos o valores fuera de catálogo',
   })
-  createQuote(@Body() createQuoteDto: CreateQuoteDto) {
+  createQuote(@Body() createQuoteDto: CreateQuoteDto): QuoteResponse {
     return this.quotesService.createQuote(createQuoteDto);
   }
 
@@ -62,7 +71,7 @@ export class QuotesController {
     status: 404,
     description: 'Cotización no encontrada',
   })
-  getQuoteById(@Param('id') id: string) {
+  getQuoteById(@Param('id') id: string): QuoteResponse {
     return this.quotesService.getQuoteById(id);
   }
 }
