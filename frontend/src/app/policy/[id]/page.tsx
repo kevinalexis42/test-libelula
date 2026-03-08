@@ -61,6 +61,7 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
     if (isAuthenticated) {
       loadPolicy();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, isAuthenticated]);
 
   if (!isAuthenticated) {

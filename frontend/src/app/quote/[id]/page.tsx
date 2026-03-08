@@ -43,6 +43,7 @@ export default function QuoteDetailPage({ params }: QuoteDetailPageProps) {
 
   useEffect(() => {
     loadQuote();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const handleEmitPolicy = async () => {
