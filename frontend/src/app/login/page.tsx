@@ -18,7 +18,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setToken } = useAuthStore();
+  const { setAuth } = useAuthStore();
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const response = await login(data);
-      setToken(response.accessToken);
+      setAuth(response.accessToken, data.email);
       router.push('/quote');
     } catch (error) {
       if (error instanceof ApiError) {

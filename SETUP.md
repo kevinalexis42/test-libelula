@@ -26,8 +26,8 @@ Antes de comenzar, asegúrate de tener instalado lo siguiente en tu máquina:
 Abre una terminal y ejecuta:
 
 ```bash
-git clone https://github.com/kevinalexis42/libelula-test.git
-cd libelula-test
+git clone https://github.com/kevinalexis42/test-libelula.git
+cd test-libelula
 ```
 
 Verás esta estructura de carpetas:

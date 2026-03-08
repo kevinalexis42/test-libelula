@@ -9,6 +9,7 @@ import {
   ProblemDetails,
   Quote,
 } from '@/types';
+import { useAuthStore } from '@/store/auth.store';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -24,7 +25,7 @@ const apiClient = axios.create({
 // Request interceptor to attach JWT token
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('access_token');
+    const { token } = useAuthStore.getState();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -65,20 +66,35 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
 
 // ============ Catalogs ============
 
+// Catalog data is static for the lifetime of the page — cache it in memory
+// to avoid redundant network requests when navigating back to the quote form.
+const catalogCache: {
+  insuranceTypes?: CatalogItem[];
+  locations?: CatalogItem[];
+  coverages: Record<string, CatalogItem[]>;
+} = { coverages: {} };
+
 export async function getInsuranceTypes(): Promise<CatalogItem[]> {
+  if (catalogCache.insuranceTypes) return catalogCache.insuranceTypes;
   const res = await apiClient.get<{ items: CatalogItem[] }>('/catalogs/insurance-types');
-  return res.data.items;
+  catalogCache.insuranceTypes = res.data.items;
+  return catalogCache.insuranceTypes;
 }
 
 export async function getCoverages(insuranceType?: string): Promise<CatalogItem[]> {
+  const key = insuranceType ?? '__all__';
+  if (catalogCache.coverages[key]) return catalogCache.coverages[key];
   const params = insuranceType ? { insuranceType } : {};
   const res = await apiClient.get<{ items: CatalogItem[] }>('/catalogs/coverages', { params });
-  return res.data.items;
+  catalogCache.coverages[key] = res.data.items;
+  return catalogCache.coverages[key];
 }
 
 export async function getLocations(): Promise<CatalogItem[]> {
+  if (catalogCache.locations) return catalogCache.locations;
   const res = await apiClient.get<{ items: CatalogItem[] }>('/catalogs/locations');
-  return res.data.items;
+  catalogCache.locations = res.data.items;
+  return catalogCache.locations;
 }
 
 // ============ Quotes ============

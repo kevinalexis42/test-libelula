@@ -117,8 +117,13 @@ TestTecnico/
     │   │   ├── quote/[id]/page.tsx   # Resultado + emisión de póliza
     │   │   └── policy/[id]/page.tsx  # Detalle de póliza (protegido)
     │   ├── components/               # Componentes reutilizables
-    │   ├── lib/api.ts                # Cliente HTTP Axios + interceptores
-    │   ├── store/auth.store.ts       # Zustand auth store
+    │   │   ├── Navbar.tsx            # Navbar reactiva al estado de autenticación
+    │   │   ├── QuoteForm.tsx         # Formulario de cotización
+    │   │   ├── QuoteResult.tsx       # Resultado + modal de confirmación
+    │   │   ├── ErrorBanner.tsx       # Componente de error reutilizable
+    │   │   └── LoadingSpinner.tsx    # Spinner de carga
+    │   ├── lib/api.ts                # Cliente HTTP Axios + interceptores + caché de catálogos
+    │   ├── store/auth.store.ts       # Zustand auth store (token + email)
     │   └── types/index.ts            # Tipos TypeScript compartidos
     ├── .env.example
     └── package.json
@@ -356,9 +361,12 @@ npm test
 ```
 
 Cubre:
-- `QuotesService`: cálculo de prima, validación de catálogos, manejo de errores
-- Tests de `BadRequestException` para valores inválidos
-- Tests de `NotFoundException` para IDs inexistentes
+
+- `QuotesService`: cálculo de prima, factores de edad/ubicación/cobertura, `BadRequestException` para valores inválidos, `NotFoundException` para IDs inexistentes
+- `AuthService`: login exitoso devuelve token firmado, `UnauthorizedException` cuando usuario no existe o contraseña incorrecta
+- `CatalogsService`: 3 tipos de seguro, 24 provincias, coberturas por tipo, `isValidInsuranceType` / `isValidCoverage` / `isValidLocation`
+- `PoliciesService`: emisión de póliza, marca cotización como `BOUND`, prevención de doble emisión (`ConflictException`), `NotFoundException` para cotización o póliza inexistentes
+- `HttpExceptionFilter`: formato Problem Details (RFC 7807), mapeo de status → title, errores de validación con array `errors`
 
 ### Backend — tests de integración (e2e)
 

@@ -5,8 +5,9 @@ import { persist } from 'zustand/middleware';
 
 interface AuthState {
   token: string | null;
+  email: string | null;
   isAuthenticated: boolean;
-  setToken: (token: string) => void;
+  setAuth: (token: string, email: string) => void;
   logout: () => void;
 }
 
@@ -14,25 +15,24 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
+      email: null,
       isAuthenticated: false,
 
-      setToken: (token: string) => {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('access_token', token);
-        }
-        set({ token, isAuthenticated: true });
+      setAuth: (token: string, email: string) => {
+        set({ token, email, isAuthenticated: true });
       },
 
       logout: () => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-        }
-        set({ token: null, isAuthenticated: false });
+        set({ token: null, email: null, isAuthenticated: false });
       },
     }),
     {
       name: 'insurtech-auth',
-      partialize: (state) => ({ token: state.token, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({
+        token: state.token,
+        email: state.email,
+        isAuthenticated: state.isAuthenticated,
+      }),
     },
   ),
 );
