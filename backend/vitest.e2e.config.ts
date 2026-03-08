@@ -8,6 +8,9 @@ export default defineConfig({
     include: ['test/**/*.e2e-spec.ts'],
     hookTimeout: 30000,
     testTimeout: 30000,
+    deps: {
+      interopDefault: true,
+    },
   },
   resolve: {
     alias: {
