@@ -32,8 +32,8 @@ describe('QuoteForm', () => {
   it('renders the form with all fields after loading catalogs', async () => {
     render(<QuoteForm onSubmit={mockOnSubmit} />);
 
-    // Initially shows loading
-    expect(screen.getByText(/Cargando catálogos/i)).toBeInTheDocument();
+    // Initially shows loading (message rendered in <p> and <span sr-only> — use getAllByText)
+    expect(screen.getAllByText(/Cargando catálogos/i)[0]).toBeInTheDocument();
 
     // Wait for catalogs to load
     await waitFor(() => {
@@ -118,13 +118,12 @@ describe('QuoteForm', () => {
     // Submit
     await user.click(screen.getByRole('button', { name: /Obtener Cotización/i }));
 
+    // RHF calls onSubmit(data, event) — assert on first argument only
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith({
-        insuranceType: 'AUTO',
-        coverage: 'PREMIUM',
-        age: 35,
-        location: 'EC-AZUAY',
-      });
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        { insuranceType: 'AUTO', coverage: 'PREMIUM', age: 35, location: 'EC-AZUAY' },
+        expect.anything(),
+      );
     });
   });
 
