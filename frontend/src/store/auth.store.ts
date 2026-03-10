@@ -27,7 +27,10 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
+      // Clave de localStorage donde Zustand guarda el estado entre recargas.
       name: 'insurtech-auth',
+      // Solo persistimos los datos. Las acciones las recrea el store en cada
+      // carga y no tiene sentido serializarlas.
       partialize: (state) => ({
         token: state.token,
         email: state.email,

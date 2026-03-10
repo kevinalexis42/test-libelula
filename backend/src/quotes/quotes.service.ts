@@ -13,19 +13,23 @@ export interface BreakdownItem {
   amount: number;
 }
 
-// Premium calculation tables
+// Tarifas base anuales en USD. Valores representativos para el MVP;
+// en producción vendrían de un motor actuarial externo.
 const BASE_PREMIUMS: Record<string, number> = {
   AUTO: 200,
   SALUD: 150,
   HOGAR: 100,
 };
 
+// Recargo plano sobre la tarifa base según el nivel de cobertura contratado.
 const COVERAGE_FACTORS: Record<string, number> = {
   BASICA: 0,
   ESTANDAR: 30,
   PREMIUM: 50,
 };
 
+// Recargo por riesgo geográfico. Las zonas costeras y de mayor densidad
+// tienen históricamente mayor siniestralidad.
 const LOCATION_FACTORS: Record<string, number> = {
   'EC-GUAYAS': 50,
   'EC-PICHINCHA': 45,
@@ -67,7 +71,9 @@ export class QuotesService {
     const { insuranceType, coverage, age, location } = dto;
     this.logger.log(`Creating quote: ${insuranceType}/${coverage} age=${age} loc=${location}`);
 
-    // Server-side catalog validation
+    // El DTO ya valida el formato y los enums con class-validator, pero aquí
+    // revalidamos contra el catálogo para verificar que la cobertura es compatible
+    // con el tipo de seguro elegido — esa relación no se puede expresar con decoradores.
     if (!this.catalogsService.isValidInsuranceType(insuranceType)) {
       throw new BadRequestException(
         `insuranceType '${insuranceType}' no es válido. Valores permitidos: AUTO, SALUD, HOGAR`,
@@ -143,6 +149,8 @@ export class QuotesService {
     return { estimatedPremium, breakdown };
   }
 
+  // Función escalonada: menores de 25 tienen mayor tasa de siniestros;
+  // mayores de 60, mayor riesgo de salud. Valores simplificados para el MVP.
   private getAgeFactor(age: number): number {
     if (age < 25) return 50;
     if (age <= 40) return 60;

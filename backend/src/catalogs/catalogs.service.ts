@@ -13,7 +13,9 @@ export interface LocationItem extends CatalogItem {
   province: string;
 }
 
-// Catalog definitions - In production these would be in DB or config service
+// Los catálogos se definen como constantes en memoria en lugar de registros de BD.
+// Solo cambian con un deploy, por lo que consultar la base de datos en cada
+// petición sería overhead innecesario. Ver decisión arquitectónica en README.md.
 export const INSURANCE_TYPES: CatalogItem[] = [
   { code: 'AUTO', name: 'Seguro de Auto' },
   { code: 'SALUD', name: 'Seguro de Salud' },
@@ -70,6 +72,8 @@ export class CatalogsService {
       ? COVERAGES.filter((c) => c.insuranceType === insuranceType.toUpperCase())
       : COVERAGES;
 
+    // Se omite 'insuranceType' del resultado: es necesario para filtrar
+    // internamente pero no debe exponerse en la respuesta de la API.
     return {
       items: filtered.map(({ code, name }) => ({ code, name })),
     };

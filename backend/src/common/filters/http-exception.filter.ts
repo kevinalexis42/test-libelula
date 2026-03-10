@@ -18,8 +18,8 @@ interface ProblemDetails {
 }
 
 /**
- * Global HTTP Exception Filter
- * Returns errors in Problem Details format (RFC 7807)
+ * Filtro global de excepciones HTTP
+ *Devuelve los errores en formato Problem Details (RFC 7807).
  */
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -40,6 +40,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } else if (typeof exceptionResponse === 'object') {
       const res = exceptionResponse as Record<string, unknown>;
       detail = (res.message as string) || exception.message;
+      // ValidationPipe envía un array cuando fallan varios campos a la vez.
+      // Lo resumimos en un mensaje único y dejamos la lista completa en 'errors'
+      // para los clientes que necesiten mostrar errores por campo.
       if (Array.isArray(res.message)) {
         detail = 'Validation failed';
         errors = res.message;

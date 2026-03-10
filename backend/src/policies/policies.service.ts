@@ -17,13 +17,15 @@ export class PoliciesService {
     const { quoteId } = dto;
     this.logger.log(`Emitting policy for quoteId: ${quoteId} by userId: ${userId}`);
 
-    // Verify quote exists
+    // Verificar que la cotización exista.
     const quote = await this.prisma.quote.findUnique({ where: { id: quoteId } });
     if (!quote) {
       throw new NotFoundException(`Cotización con id '${quoteId}' no encontrada`);
     }
 
-    // Check for double emission (unique constraint on quoteId)
+    // Verificamos antes del insert para devolver un 409 con un mensaje legible.
+    // Depender solo de la constraint de unicidad de la DB produciría un error
+    // de Prisma sin contexto que habría que capturar y traducir de todos modos.
     const existingPolicy = await this.prisma.policy.findUnique({
       where: { quoteId },
     });
@@ -42,7 +44,7 @@ export class PoliciesService {
       },
     });
 
-    // Update quote status to BOUND
+    // Actualizar el estado de la cotización a BOUND
     await this.prisma.quote.update({
       where: { id: quoteId },
       data: { status: 'BOUND' },

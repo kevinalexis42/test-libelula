@@ -13,7 +13,7 @@ import { useAuthStore } from '@/store/auth.store';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-// Axios instance with base config
+// Instancia de Axios con configuración base.
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -22,7 +22,9 @@ const apiClient = axios.create({
   timeout: 10000,
 });
 
-// Request interceptor to attach JWT token
+// Adjunta el token JWT a cada petición saliente si el usuario está autenticado.
+// useAuthStore.getState() es la API imperativa de Zustand para leer el estado
+// fuera de React — seguro aquí porque el interceptor solo corre en el navegador.
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const { token } = useAuthStore.getState();
@@ -33,7 +35,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor to normalize errors
+// Interceptor de respuesta para normalizar los errores.
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ProblemDetails>) => {
@@ -66,8 +68,8 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
 
 // ============ Catalogs ============
 
-// Catalog data is static for the lifetime of the page — cache it in memory
-// to avoid redundant network requests when navigating back to the quote form.
+// Los datos del catálogo son estáticos durante el ciclo de vida de la página,
+// por lo que se almacenan en caché en memoria para evitar solicitudes de red redundantes al volver a navegar al formulario de cotización.
 const catalogCache: {
   insuranceTypes?: CatalogItem[];
   locations?: CatalogItem[];

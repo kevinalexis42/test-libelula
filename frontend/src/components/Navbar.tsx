@@ -9,6 +9,9 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const { isAuthenticated, email, logout } = useAuthStore();
 
+  // Diferimos el render del estado de auth hasta después de la hidratación.
+  // Sin esto, el servidor genera HTML con el estado no autenticado y el cliente
+  // lo sobreescribe con el autenticado, provocando un error de hidratación en React.
   useEffect(() => {
     setMounted(true);
   }, []);

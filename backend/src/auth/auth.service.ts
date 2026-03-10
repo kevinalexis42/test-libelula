@@ -19,6 +19,9 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 
+    // Ambos casos devuelven el mismo mensaje de forma intencional.
+    // Mensajes distintos para "usuario no existe" y "contraseña incorrecta"
+    // permitirían a un atacante enumerar qué emails están registrados.
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
